@@ -6,8 +6,7 @@
   TODAS AS PARTES ORIGINAIS DESSE EXERCÍCIO PROGRAMA (EP) FORAM 
   DESENVOLVIDAS E IMPLEMENTADAS POR MIM SEGUINDO AS INSTRUÇÕES DESSE EP
   E QUE PORTANTO NÃO CONSTITUEM PLÁGIO. DECLARO TAMBÉM QUE SOU RESPONSÁVEL
-  POR TODAS AS CÓPIAS DESSE PROGRAMA E QUE EU NÃO DISTRIBUI OU FACILITEI A
-  SUA DISTRIBUIÇÃO. ESTOU CIENTE QUE OS CASOS DE PLÁGIO SÃO PUNIDOS COM 
+  POR TODAS AS CÓPIAS DESSE PROGRAMA E QUE EU NÃO DISTRIBUI OU FACILITEI A SUA DISTRIBUIÇÃO. ESTOU CIENTE QUE OS CASOS DE PLÁGIO SÃO PUNIDOS COM 
   REPROVAÇÃO DIRETA NA DISCIPLINA.
 
   Nome:
@@ -73,6 +72,7 @@ mallocSafe(size_t nbytes);
 static double 
 luminosidadePixel(Imagem *img, int col, int lin);
 
+static int estaDentro(int linha, int coluna, int height, int width);
 /*-------------------------------------------------------------
   mallocImagem
   
@@ -338,13 +338,20 @@ repinteRegioes(Imagem *img, CelRegiao *iniRegioes, int col, int lin,
 static Bool
 pixelBorda(Imagem *img, int limiar, int col, int lin)
 {
-    /* O objetivo do return a seguir e evitar que 
-       ocorra erro de sintaxe durante a fase de desenvolvimento 
-       do EP. Esse return devera ser removido depois que
-       a funcao estiver pronta.
-    */
-    AVISO(imagem: Vixe! Ainda nao fiz a funcao pixelBorda.);
-    return FALSE; 
+    int i, j;
+    int gradX = 0;
+    int gradY = 0;
+    static int gX[3][3] = {{-1,0,1},{-2,0,2},{-1,0,1}};
+    static int gY[3][3] = {{1,2,1},{0,0,0},{-1,-2,-1}};
+    for(i = -1; i <= 1; i++) {
+        for(j = -1; j <= 1; j++) {
+            if(estaDentro(lin + i, col + j, img->height, img->width)) {
+                gradX += luminosidadePixel(img, lin + i, col + j) * gX[i + 1][j + 1];
+                gradY += luminosidadePixel(img, lin + i, col + j) * gY[i + 1][j + 1];
+            }
+        }
+    }
+    return (gradX*gradX + gradY*gradY) > (limiar * limiar);
 }
 
 /*-------------------------------------------------------------
@@ -633,7 +640,6 @@ luminosidadePixel(Imagem *img, int col, int lin)
               + 0.07 * img->pixel[lin][col].cor[BLUE] );
 }
 
-
-int estaDentro(int linha, int coluna, int height, int width) {
+static int estaDentro(int linha, int coluna, int height, int width) {
     return (linha >= 0) && (linha < height) && (coluna >= 0) && (coluna < width);
 }

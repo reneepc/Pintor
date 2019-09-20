@@ -9,8 +9,8 @@
   SUA DISTRIBUIÇÃO. ESTOU CIENTE QUE OS CASOS DE PLÁGIO SÃO PUNIDOS COM 
   REPROVAÇÃO DIRETA NA DISCIPLINA.
 
-  Nome:
-  NUSP:
+  Nome: Renê Edurado Pereira Cardozo
+  NUSP: 9797315
 
   Referências: Com exceção das rotinas fornecidas no esqueleto e em sala
   de aula, caso você tenha utilizado alguma refência, liste-as abaixo
@@ -59,31 +59,15 @@ mostreUso(char *nomePrograma);
 int 
 main(int argc, char *argv[])
 {
-    Imagem *imgOriginal   = NULL; /* ponteiro para a imagem original */
-    Imagem *tela          = NULL; /* ponteiro para a imagem corrente ou atual */
+    /* 1. pegue da linha de comando o nome do arquivo com a imagem */
+    /* 2. carregue de uma arquivo, no formato PPM, a imagem original */
+    /* 3 crie a imagem corrente (tela) em que trabalharemos */
+    Imagem *imgOriginal   = leImagem(argv[1]); /* ponteiro para a imagem original */
+    Imagem *tela          = mallocImagem(imgOriginal->width, imgOriginal->height); /* ponteiro para a imagem corrente ou atual */
     CelRegiao *iniRegioes = NULL; /* ponteiro para a lista de regioes */
 
-    /* 1. pegue da linha de comando o nome do arquivo com a imagem */
-
-    /* 2. carregue de uma arquivo, no formato PPM, a imagem original */
-    FILE* arquivo;
-    arquivo = fopen(argv[1], "r");
-
-    if (imgOriginal == NULL) 
-    {
-        AVISO(main: Vixe! ainda nao li a imagem original.);
-        return 0;    
-    }
-  
-    /* 3 crie a imagem corrente (tela) em que trabalharemos */
-
     /* 4 copie a imagem original (lida) para a imagem corrente (tela) */ 
-
-    if (tela == NULL) 
-    {
-        AVISO(main: Vixe! ainda nao criei a imagem corrente.);
-        return 0;    
-    }
+    copieImagem(tela, imgOriginal);
 
     /* 5 segmente a imagem corrente (tela) criando a lista de regioes */
 
@@ -95,7 +79,7 @@ main(int argc, char *argv[])
     }
 
     /* 6 passe a bola para a parte grafica */  
-    myInit(&argc, argv, tela, imgOriginal, iniRegioes);
+    //myInit(&argc, argv, tela, imgOriginal, iniRegioes);
   
     return 0; /* we never return here; this just keeps the compiler happy
                  http://www.cs.umd.edu/class/fall2011/cmsc427/lectures.shtml */
@@ -167,5 +151,26 @@ mostreUso(char *nomePrograma)
             "meu_prompt> %s <nome arq. imagem>\n"
             "    <nome arq. image> = nome arq. com Portable PixMap Binary.\n",
             nomePrograma, nomePrograma);
+}
+
+
+static Imagem* leImagem(char* nome_arquivo) {
+    int width, height, max_cor;
+    int linha, coluna;
+    Imagem* img;
+
+    FILE* arquivo;
+    arquivo = fopen(nome_arquivo, "r");
+
+    fseek(arquivo, 2, SEEK_SET);
+    fscanf(arquivo, "%d %d %d", &width, &height, &max_cor);
+    img = mallocImagem(width, height);
+    for(linha = 0; linha < img->height; linha++)
+        for(coluna = 0; coluna < img->width; coluna++) {
+            fscanf(arquivo, "%hhu", &img->pixel[linha][coluna].cor[RED]);
+            fscanf(arquivo, "%hhu", &img->pixel[linha][coluna].cor[GREEN]);
+            fscanf(arquivo, "%hhu", &img->pixel[linha][coluna].cor[BLUE]);
+        }
+    return img;
 }
 

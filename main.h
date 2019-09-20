@@ -22,4 +22,7 @@ graveImagem(Imagem *img);
 void 
 quit (Imagem *tela, Imagem *img, CelRegiao *listaRegioes);
 
+static Imagem* 
+leImagem(char* nome_arquivo);
+
 #endif
