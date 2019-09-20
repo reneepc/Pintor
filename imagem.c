@@ -88,13 +88,16 @@ luminosidadePixel(Imagem *img, int col, int lin);
 Imagem *
 mallocImagem(int width, int height)
 {
-    /* O objetivo do return a seguir e evitar que 
-       ocorra erro de sintaxe durante a fase de desenvolvimento 
-       do EP. Esse return devera ser removido depois que
-       a funcao estiver pronta.
-    */
-    AVISO(imagem: Vixe! Ainda nao fiz a funcao mallocImagem);
-    return NULL;
+    int row;
+    Imagem* imagem = (Imagem*)mallocSafe(sizeof(Imagem));
+    imagem->width = width;
+    imagem->height = height;
+
+    imagem->pixel = (Pixel**)mallocSafe(sizeof(Pixel*) * height);
+    for(row = 0; row < height; row++)
+        imagem->pixel[row] = (Pixel*)mallocSafe(sizeof(Pixel) * width);
+
+    return imagem;
 }
 
 
@@ -110,7 +113,11 @@ mallocImagem(int width, int height)
 void
 freeImagem(Imagem *img)
 {
-    AVISO(imagem: Vixe! Ainda nao fiz a funcao freeImagem.);
+    int row;
+    for(row = 0; row < img->height; row++)
+        free(img->pixel[row]);
+    free(img->pixel);
+    free(img);
 }
 
 
@@ -148,7 +155,13 @@ freeRegioes(CelRegiao *iniRegioes)
 void 
 copieImagem(Imagem *destino, Imagem *origem)
 {
-    AVISO(imagem: Vixe! Ainda nao fiz a funcao copieImagem.);
+    int linha, coluna;
+    for(linha = 0; linha < origem->height; linha++)
+        for(coluna = 0; coluna < origem->width; coluna++) {
+            destino->pixel[linha][coluna].cor[RED] = origem->pixel[linha][coluna].cor[RED];
+            destino->pixel[linha][coluna].cor[GREEN] = origem->pixel[linha][coluna].cor[GREEN];
+            destino->pixel[linha][coluna].cor[BLUE] = origem->pixel[linha][coluna].cor[BLUE];
+        }
 }
 
 /*-------------------------------------------------------------
@@ -173,7 +186,11 @@ getPixel(Imagem *img, int col, int lin)
        a funcao estiver pronta.
     */
     Pixel pixel; 
-    AVISO(imagem: Vixe! Ainda nao fiz a funcao getPixel.);
+    pixel.cor[RED] = img->pixel[lin][col].cor[RED];
+    pixel.cor[GREEN] = img->pixel[lin][col].cor[GREEN];
+    pixel.cor[BLUE] = img->pixel[lin][col].cor[BLUE];
+    pixel.regiao = img->pixel[lin][col].regiao;
+    
     return pixel;    
 }
 
@@ -190,7 +207,9 @@ getPixel(Imagem *img, int col, int lin)
 static void
 setPixel(Imagem *img, int col, int lin, Byte cor[])
 {
-    AVISO(imagem: Vixe! Ainda nao fiz a funcao setPixel.);
+    img->pixel[lin][col].cor[RED] = cor[RED];
+    img->pixel[lin][col].cor[GREEN] = cor[GREEN];
+    img->pixel[lin][col].cor[BLUE] = cor[BLUE];
 }
 
 /*-------------------------------------------------------------
@@ -207,7 +226,10 @@ setPixel(Imagem *img, int col, int lin, Byte cor[])
 void 
 pinteImagem(Imagem *img, Byte cor[])
 {
-    AVISO(imagem: Vixe! Ainda nao fiz a funcao pinteImagem.);
+    int linha, coluna;
+    for(linha = 0; linha < img->height; linha++)
+        for(coluna = 0; coluna < img->width; coluna++)
+            setPixel(img, coluna, linha, cor);
 }
 
 /*------------------------------------------------------------- 
@@ -612,4 +634,6 @@ luminosidadePixel(Imagem *img, int col, int lin)
 }
 
 
-
+int estaDentro(int linha, int coluna, int height, int width) {
+    return (linha >= 0) && (linha < height) && (coluna >= 0) && (coluna < width);
+}

@@ -1,6 +1,5 @@
 /*
-  \__\__\__\__\__\__\__\__\__\__\__\__\__\__\__\__\__\__\__\__\__\__\__
-
+  \__\__\__\__\__\__\__\__\__\__\__\__\__\__\__\__\__\__\__\__\__\__\__ 
   AO PREENCHER ESSE CABEÇALHO COM O MEU NOME E O MEU NÚMERO USP, 
   DECLARO QUE SOU O ÚNICO AUTOR E RESPONSÁVEL POR ESSE PROGRAMA. 
   TODAS AS PARTES ORIGINAIS DESSE EXERCÍCIO PROGRAMA (EP) FORAM 
@@ -67,6 +66,8 @@ main(int argc, char *argv[])
     /* 1. pegue da linha de comando o nome do arquivo com a imagem */
 
     /* 2. carregue de uma arquivo, no formato PPM, a imagem original */
+    FILE* arquivo;
+    arquivo = fopen(argv[1], "r");
 
     if (imgOriginal == NULL) 
     {

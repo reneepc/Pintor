@@ -1,0 +1,51 @@
+\documentclass{article}
+
+\usepackage[utf8]{inputenc}
+\usepackage{mathtools}
+
+\title{Planejamento}
+\author{Renê Cardozo}
+
+\begin{document}
+\maketitle
+A imagem original lida do arquivo sera copiada para uma imagem corrente, a imagem original nunca será alterada, apenas a
+imagem corrente será editada.
+
+Temos as opções:
+\begin{itemize}
+\item r: pinta as regiões.
+\item b: pinta as bordas.
+\item o: copia a imagem original novamente na imagem corrente.
+\item l: set todos os pixels com a cor de BACK_GROUND em cores.h.
+\item g: grava a imagem corrente.
+\item clique esquerdo com o mouse: pinta a região a que o ponto pertence.
+\item clique direito com o mouse: pinta regiões de mesma cor a que o ponto pertence.
+\item a,d,s: aumenta, diminui limiar ou segmenta imagem baseado no novo limiar.
+\item x: a execução é encerrada.
+\end{itemize}
+
+
+\section{Segmentação} A segmentação subdivide uma imagem em regiões ou objetos que a compõem. O nível de detalhe em que
+a subdivisão é realizada depende do problema a ser resolvido. A imagem  deve ser segmentada em regiões conexas em
+relação a pixels de borda. Cada região será formada por pixels de borda ou apenas por pixels que não são de borda e são
+limitados por bordas ou pela fronteira da imagem. Dessa forma, um componente central desse EP utilizado para segmentar
+imagens será a função pixelBorda(img, limiar, col, lin); que recebe a posição [lin][col] de um pixel de uma imagem img e
+retorna TRUE se o pixel [lin][col] é de borda em relação ao valor do inteiro limiar e retorna FALSE em caso contrário.
+
+
+De maneira geral, em deteccão de bordas são identificados os pixels da imagem em que há uma mudança brusca ou
+descontínua na luminosidade. No EP, a luminosidade relativa de um pixel[lin][col] é calculada pela função
+luminosidadePixel(), que está implementada no esqueleto do EP.
+
+Para determinar se um pixel é de borda utilizaremos o filtro de Sobel. No método será necessário o cálculo de duas
+grandezas, os chamados gradientes horizontal gX e o gradiente vertical gY no pixel. A seguir denotaremos lum[i][j] a
+luminosidade do pixel. Calculados os grandiente gX e gY no pixel, a função pixelBorda declara o pixel de borda em
+relação a um dado limiar se a norma euclidiana do gradiente for maior que o limiar.
+
+
+As estruturas usadas para representar imagens, pixels, células de listas de pixels e células de listas de regiões estão
+todas definidas no arquivo imagens.h. Cada cor possui o tipo Byte com valores de 0 a 255. A estrutura pixel possui um
+array com suas três cores e um apontador para a sua região. A estrutura imagem possuirá o campo width, height e uma
+matriz de pixels. Para alocar a matriz, primeiro declara-se um array de pointeiros com (int*) rows com o campo 
+\end{document}
+
