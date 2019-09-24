@@ -42,6 +42,7 @@
 
 /* suposto numero maximo de caracteres em um nome de arquivo */
 #define MAX_NOME 128
+#define MAX 258
 
 /*---------------------------------------------------------------*/
 /*
@@ -155,6 +156,7 @@ mostreUso(char *nomePrograma)
 
 
 static Imagem* leImagem(char* nome_arquivo) {
+    char buf[MAX];
     int width, height, max_cor;
     int linha, coluna;
     Imagem* img;
@@ -162,8 +164,19 @@ static Imagem* leImagem(char* nome_arquivo) {
     FILE* arquivo;
     arquivo = fopen(nome_arquivo, "r");
 
-    fseek(arquivo, 2, SEEK_SET);
-    fscanf(arquivo, "%d %d %d", &width, &height, &max_cor);
+    /* Pula os caracteres P6 no início do arquivo */
+    fgets(buf, MAX, arquivo);
+    /* Verifica se a linha não é um comentário e então armazena seu conteudo*/ 
+    do {
+        fgets(buf, MAX, arquivo);
+    } while(buf[0] == '#');
+    sscanf(buf, "%d %d", &width, &height);
+
+    do {
+        fgets(buf, MAX, arquivo);
+    } while(buf[0] == '#');
+    sscanf(buf, "%d", &max_cor);
+
     img = mallocImagem(width, height);
     for(linha = 0; linha < img->height; linha++)
         for(coluna = 0; coluna < img->width; coluna++) {

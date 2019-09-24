@@ -9,8 +9,8 @@
   POR TODAS AS CÓPIAS DESSE PROGRAMA E QUE EU NÃO DISTRIBUI OU FACILITEI A SUA DISTRIBUIÇÃO. ESTOU CIENTE QUE OS CASOS DE PLÁGIO SÃO PUNIDOS COM 
   REPROVAÇÃO DIRETA NA DISCIPLINA.
 
-  Nome:
-  NUSP:
+  Nome: Renê Eduardo Pereira Cardozo
+  NUSP: 9797315
 
   imagem.c
 
@@ -94,8 +94,9 @@ mallocImagem(int width, int height)
     imagem->height = height;
 
     imagem->pixel = (Pixel**)mallocSafe(sizeof(Pixel*) * height);
-    for(row = 0; row < height; row++)
+    for(row = 0; row < height; row++) {
         imagem->pixel[row] = (Pixel*)mallocSafe(sizeof(Pixel) * width);
+    }
 
     return imagem;
 }
