@@ -72,6 +72,10 @@ main(int argc, char *argv[])
 
     /* 5 segmente a imagem corrente (tela) criando a lista de regioes */
 
+    int i, j;
+    for(i = 0; i < 20; i++)
+      for(j = 0; j < 20; j++)
+        printf("%d", imgOriginal->pixel[i][j].cor[RED]);
     if (iniRegioes == NULL) 
     {
         AVISO(main: Vixe! ainda nao segmentei a imagem.);
@@ -80,7 +84,7 @@ main(int argc, char *argv[])
     }
 
     /* 6 passe a bola para a parte grafica */  
-    //myInit(&argc, argv, tela, imgOriginal, iniRegioes);
+    myInit(&argc, argv, tela, imgOriginal, iniRegioes);
   
     return 0; /* we never return here; this just keeps the compiler happy
                  http://www.cs.umd.edu/class/fall2011/cmsc427/lectures.shtml */
@@ -180,9 +184,9 @@ static Imagem* leImagem(char* nome_arquivo) {
     img = mallocImagem(width, height);
     for(linha = 0; linha < img->height; linha++)
         for(coluna = 0; coluna < img->width; coluna++) {
-            fscanf(arquivo, "%hhu", &img->pixel[linha][coluna].cor[RED]);
-            fscanf(arquivo, "%hhu", &img->pixel[linha][coluna].cor[GREEN]);
-            fscanf(arquivo, "%hhu", &img->pixel[linha][coluna].cor[BLUE]);
+            img->pixel[linha][coluna].cor[RED] = fgetc(arquivo);
+            img->pixel[linha][coluna].cor[GREEN] = fgetc(arquivo);
+            img->pixel[linha][coluna].cor[BLUE] = fgetc(arquivo);
         }
     return img;
 }
