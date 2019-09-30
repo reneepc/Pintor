@@ -12,6 +12,9 @@
   Nome: Renê Edurado Pereira Cardozo
   NUSP: 9797315
 
+  // Não consegui fazer a função de segmentação das imagens, apesar da função pixelBorda aparentemente
+  // funcionar. Assumi que a imagem estava segmentada e prossegui fazendo as outras funções de tratamento
+  // das listas ligadas.
   Referências: Com exceção das rotinas fornecidas no esqueleto e em sala
   de aula, caso você tenha utilizado alguma refência, liste-as abaixo
   para que o seu programa não seja considerada plágio.
@@ -32,7 +35,7 @@
                        mallocImagem(), freeImagem(),   freeRegioes()
                        copieImagem(),  segmenteImagem()
                      */
-#include "graphic.h" /* myInit() */
+#include "graphic.h" /* myInit() */ 
 #include "main.h"    /* quit(), graveImagem() */
 
 /*---------------------------------------------------------------*/
@@ -61,6 +64,9 @@ int
 main(int argc, char *argv[])
 {
     /* 1. pegue da linha de comando o nome do arquivo com a imagem */
+    if(argc < 2) {
+      mostreUso("ep2"); 
+    }
     /* 2. carregue de uma arquivo, no formato PPM, a imagem original */
     /* 3 crie a imagem corrente (tela) em que trabalharemos */
     Imagem *imgOriginal   = leImagem(argv[1]); /* ponteiro para a imagem original */
@@ -72,13 +78,9 @@ main(int argc, char *argv[])
 
     /* 5 segmente a imagem corrente (tela) criando a lista de regioes */
 
-    int i, j;
-    for(i = 0; i < 20; i++)
-      for(j = 0; j < 20; j++)
-        printf("%d", imgOriginal->pixel[i][j].cor[RED]);
     if (iniRegioes == NULL) 
     {
-        AVISO(main: Vixe! ainda nao segmentei a imagem.);
+        iniRegioes = segmenteImagem(tela, LIMIAR);
         /* apesar disso ainda e possivel visualizar a imagem lida,
            vamos em frente */
     }
@@ -140,7 +142,13 @@ quit(Imagem *tela, Imagem *img, CelRegiao *iniRegioes)
 void
 graveImagem(Imagem *img)
 {
-    AVISO(main.c: Vixe Ainda nao fiz a funcao graveImagem.);
+  int lin, col;
+  char nome_arquivo[MAX_NOME];
+  fprintf(stdout, "Digite o nome do arquivo no qual será guardada a imagem: ");
+  scanf("%s", nome_arquivo);
+  FILE* arquivo = fopen(nome_arquivo, "w");
+
+  graveImagemPPM(nome_arquivo, img);
 }
 
 /*---------------------------------------------------------------*/
@@ -159,7 +167,7 @@ mostreUso(char *nomePrograma)
 }
 
 
-static Imagem* leImagem(char* nome_arquivo) {
+Imagem* leImagem(char* nome_arquivo) {
     char buf[MAX];
     int width, height, max_cor;
     int linha, coluna;
@@ -191,3 +199,16 @@ static Imagem* leImagem(char* nome_arquivo) {
     return img;
 }
 
+void imprime_lista(CelRegiao* regiao) {
+
+  if(regiao->borda)
+    fprintf(stdout, "Estamos em uma região de borda\n");
+  else
+    fprintf(stdout, "Estamos em uma região que não é de borda\n");
+
+  fprintf(stdout, "O número de pixel da região é de: %d", regiao->nPixels);
+
+  CelPixel* p;
+  for(p = regiao->iniPixels; p != NULL; p = p->proxPixel)
+    fprintf(stdout, " (%d,%d) ", p->lin, p->col);
+}

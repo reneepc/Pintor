@@ -12,6 +12,9 @@
   Nome: Renê Eduardo Pereira Cardozo
   NUSP: 9797315
 
+  // Não consegui fazer a função de segmentação das imagens, apesar da função pixelBorda aparentemente
+  // funcionar. Assumi que a imagem estava segmentada e prossegui fazendo as outras funções de tratamento
+  // das listas ligadas.
   imagem.c
 
   Referências: Com exceção das rotinas fornecidas no esqueleto e em sala
@@ -73,6 +76,8 @@ static double
 luminosidadePixel(Imagem *img, int col, int lin);
 
 static int estaDentro(int linha, int coluna, int height, int width);
+
+static int corIgual(Pixel pixel1, CelRegiao* regiao);
 /*-------------------------------------------------------------
   mallocImagem
   
@@ -162,6 +167,7 @@ copieImagem(Imagem *destino, Imagem *origem)
             destino->pixel[linha][coluna].cor[RED] = origem->pixel[linha][coluna].cor[RED];
             destino->pixel[linha][coluna].cor[GREEN] = origem->pixel[linha][coluna].cor[GREEN];
             destino->pixel[linha][coluna].cor[BLUE] = origem->pixel[linha][coluna].cor[BLUE];
+            destino->pixel[linha][coluna].regiao = NULL;
         }
 }
 
@@ -339,20 +345,21 @@ repinteRegioes(Imagem *img, CelRegiao *iniRegioes, int col, int lin,
 static Bool
 pixelBorda(Imagem *img, int limiar, int col, int lin)
 {
-    int i, j;
-    int gradX = 0;
-    int gradY = 0;
-    static int gX[3][3] = {{-1,0,1},{-2,0,2},{-1,0,1}};
-    static int gY[3][3] = {{1,2,1},{0,0,0},{-1,-2,-1}};
-    for(i = -1; i <= 1; i++) {
-        for(j = -1; j <= 1; j++) {
-            if(estaDentro(lin + i, col + j, img->height, img->width)) {
-                gradX += luminosidadePixel(img, lin + i, col + j) * gX[i + 1][j + 1];
-                gradY += luminosidadePixel(img, lin + i, col + j) * gY[i + 1][j + 1];
-            }
-        }
-    }
-    return (gradX*gradX + gradY*gradY) > (limiar * limiar);
+  if(lin == 0 || col == 0 || lin == img->height - 1 || col == img->width - 1) return 1;
+  int i, j;
+  int gradX = 0;
+  int gradY = 0;
+  static int gX[3][3] = {{-1,0,1},{-2,0,2},{-1,0,1}};
+  static int gY[3][3] = {{1,2,1},{0,0,0},{-1,-2,-1}};
+  for(i = -1; i <= 1; i++) {
+      for(j = -1; j <= 1; j++) {
+          if(estaDentro(lin + i, col + j, img->height, img->width)) {
+              gradX += luminosidadePixel(img, col + i, lin + j) * gX[i + 1][j + 1];
+              gradY += luminosidadePixel(img, col + i, lin + j) * gY[i + 1][j + 1];
+          }
+      }
+  }
+  return (gradX*gradX + gradY*gradY) > (limiar * limiar);
 }
 
 /*-------------------------------------------------------------
@@ -445,12 +452,40 @@ pixelBorda(Imagem *img, int limiar, int col, int lin)
 CelRegiao *
 segmenteImagem(Imagem *img, int limiar)
 {
-    /* O objetivo do return a seguir e evitar que 
-       ocorra erro de sintaxe durante a fase de desenvolvimento do EP. 
-       Esse return devera ser removido depois que a funcao estiver pronta.
-    */
-    AVISO(imagem: Vixe! Ainda nao fiz a funcao segmenteImagem.);
-    return NULL; 
+  int lin, col;
+  CelRegiao* regiao = NULL;
+  CelRegiao* anterior = NULL;
+
+  for(lin = 0; lin < img->height; ++lin) {
+    for(col = 0; col < img->width; ++col) {
+      if(img->pixel[lin][col].regiao == NULL) {
+        regiao = (CelRegiao*)malloc(sizeof(CelRegiao));
+
+        // Se for o primeiro pixel a ser adicionado não há próximo
+        if(lin == 0 && col == 0)
+          regiao->proxRegiao = NULL;
+        else
+          regiao->proxRegiao = anterior;
+        regiao->iniPixels = NULL;
+
+        // Inicia a região com a cor do pixel atual
+        regiao->cor[RED] = img->pixel[lin][col].cor[RED];
+        regiao->cor[GREEN] = img->pixel[lin][col].cor[GREEN];
+        regiao->cor[BLUE] = img->pixel[lin][col].cor[BLUE];
+
+        // Verifica se será uma região de borda
+        if(pixelBorda(img, limiar, col, lin))
+          regiao->borda = TRUE;
+        else
+          regiao->borda = FALSE;
+
+        regiao->nPixels = pixelsRegiao(img, limiar, col, lin, regiao);
+        fprintf(stdout, "Pixels: %d", regiao->nPixels);
+        anterior = regiao;
+      }
+    } 
+  }
+  return regiao;
 }
 
 /*------------------------------------------------------------- 
@@ -571,13 +606,47 @@ segmenteImagem(Imagem *img, int limiar)
 static int
 pixelsRegiao(Imagem *img, int limiar, int col, int lin, CelRegiao *regiao)
 {
-    /* O objetivo do return a seguir e evitar que 
-       ocorra erro de sintaxe durante a fase de desenvolvimento 
-       do EP. Esse return devera ser removido depois que
-       a funcao estiver pronta.
-    */
-    AVISO(imagem: Vixe! Ainda nao fiz a funcao pixelsRegiao.);
-    return 0;
+  // se a cor for diferente ou se a regiao for de borda e o pixel não, e vise-versa, a recursão para.
+  if(!corIgual(img->pixel[lin][col], regiao) || regiao->borda != pixelBorda(img, limiar, col, lin)) return 0;
+
+  int i;
+  int pixels = 1;
+  
+  // Adiciona pixel atual ao início da lista de pixels da lista CelRegiao
+  img->pixel[lin][col].regiao = regiao;
+  CelPixel* pixel = (CelPixel*)malloc(sizeof(CelPixel));
+  CelPixel* p = regiao->iniPixels;
+  pixel->lin = lin;
+  pixel->col = col;
+  pixel->proxPixel = p;
+  regiao->iniPixels = pixel;
+
+  /* se for de borda, visita os pixels da diagonal adjacente */
+  if(pixelBorda(img, limiar, col, lin) && regiao->borda) {
+    for(i = -1; i <= 1; i += 2) {
+      if(estaDentro(lin + i, col + i, img->height, img->width)) {
+        if(img->pixel[lin + i][col + i].regiao == NULL)
+          pixels += pixelsRegiao(img, limiar, col + i, lin + i, regiao);
+      }
+      if(estaDentro(lin + i, col - i, img->height, img->width)) {
+        if(img->pixel[lin + i][col - i].regiao == NULL)
+          pixels += pixelsRegiao(img, limiar, col - i, lin + i, regiao);
+      }
+    }
+  }
+
+  /* visita os pixels vertical e horizontalmente adjacentes*/
+  for(i = -1; i <= 1; i += 2) {
+    if(estaDentro(lin + i, col, img->height, img->width)) {
+      if(img->pixel[lin + i][col].regiao == NULL)
+        pixels += pixelsRegiao(img, limiar, col, lin + i, regiao);
+    }
+      if(estaDentro(lin, col + i, img->height, img->width)){
+        if(img->pixel[lin][col + i].regiao == NULL)
+          pixels += pixelsRegiao(img, limiar, col + i, lin, regiao); 
+    }
+  }
+  return pixels;
 }
  
 
@@ -643,4 +712,11 @@ luminosidadePixel(Imagem *img, int col, int lin)
 
 static int estaDentro(int linha, int coluna, int height, int width) {
     return (linha >= 0) && (linha < height) && (coluna >= 0) && (coluna < width);
+}
+
+static int corIgual(Pixel pixel1, CelRegiao* regiao) {
+  if(pixel1.cor[RED] != regiao->cor[RED]) return FALSE;
+  if(pixel1.cor[GREEN] != regiao->cor[GREEN]) return FALSE;
+  if(pixel1.cor[BLUE] != regiao->cor[BLUE]) return FALSE;
+  return TRUE;
 }
