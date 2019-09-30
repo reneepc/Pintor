@@ -12,9 +12,6 @@
   Nome: Renê Eduardo Pereira Cardozo
   NUSP: 9797315
 
-  // Não consegui fazer a função de segmentação das imagens, apesar da função pixelBorda aparentemente
-  // funcionar. Assumi que a imagem estava segmentada e prossegui fazendo as outras funções de tratamento
-  // das listas ligadas.
   imagem.c
 
   Referências: Com exceção das rotinas fornecidas no esqueleto e em sala
@@ -79,15 +76,15 @@ static int estaDentro(int linha, int coluna, int height, int width);
 
 static int corIgual(Pixel pixel1, CelRegiao* regiao);
 /*-------------------------------------------------------------
-  mallocImagem
-  
-  Recebe inteiros WIDTH e HEIGHT e retorna um ponteiro para uma
-  estrutura (tipo Imagem) que representa uma imagem com HEIGHT
-  linhas e WIDTH colunas (HEIGHT x WIDTH pixels).
-
-  Cada pixel da imagem e do tipo Pixel.
+ *  mallocImagem
    
-  Esta funcao utiliza a funcao mallocSafe.
+ *  recebe inteiros WIDTH e HEIGHT e retorna um ponteiro para uma
+ *  estrutura (tipo Imagem) que representa uma imagem com HEIGHT
+ *  linhas e WIDTH colunas (HEIGHT x WIDTH pixels).
+
+ *  cada pixel da imagem e do tipo Pixel.
+    
+ *  esta funcao utiliza a funcao mallocSafe.
 */
 
 Imagem *
@@ -108,12 +105,12 @@ mallocImagem(int width, int height)
 
 
 /*-------------------------------------------------------------
-  freeImagem
-  
-  Recebe um ponteiro IMG para um estrutura que representa uma 
-  imagem  e libera a memoria utilizada pela estrutura.
-  
-  Esta funcao utiliza a funcao free.
+ *  freeImagem
+   
+ *  recebe um ponteiro IMG para um estrutura que representa uma 
+ *  imagem  e libera a memoria utilizada pela estrutura.
+   
+ *  esta funcao utiliza a funcao free.
 */
 
 void
@@ -128,33 +125,46 @@ freeImagem(Imagem *img)
 
 
 /*-------------------------------------------------------------
-  freeRegioes
-  
-  Recebe um ponteiro INIREGIOES para uma lista de regioes de
-  uma imagem e libera a memoria aloca pelas celulas dessa lista.
+ *  freeRegioes
+   
+ *  Recebe um ponteiro INIREGIOES para uma lista de regioes de
+ *  uma imagem e libera a memoria aloca pelas celulas dessa lista.
 
-  Esta função também libera a memoria alocada pelas celulas 
-  da lista de pixels de cada regiao.
+ *  Esta função também libera a memoria alocada pelas celulas 
+ *  da lista de pixels de cada regiao.
 */
 
 void 
 freeRegioes(CelRegiao *iniRegioes)
 {
-    AVISO(imagem: Vixe! Ainda nao fiz a funcao freeRegioes);
+  CelRegiao* regiao = iniRegioes;
+  while(regiao != NULL) {
+    //Libera os pixels de cada região
+    CelPixel* pixel = regiao->iniPixels;
+    while(pixel != NULL) {
+      CelPixel* proxPixel = pixel->proxPixel; 
+      free(pixel);
+      pixel = proxPixel;
+    }
+    
+    CelRegiao* proxRegiao = regiao->proxRegiao;
+    free(regiao);
+    regiao = proxRegiao;
+  }
 }
 
 
 /*-------------------------------------------------------------
-  copieImagem 
+ *  copieImagem 
 
-  Recebe ponteiros DESTINO e ORIGINAL para estruturas que 
-  representam imagems.
- 
-  A funcao copia a imagem ORIGEM sobre a imagem DESTINO. 
-   
-  A imagem DESTINO já deve ter sido criada antes da chama da
-  funcao.  Assim, a memória utilizada por DESTINO ja deve ter
-  sido _totalmente_ alocada.
+ *  Recebe ponteiros DESTINO e ORIGINAL para estruturas que 
+ *  representam imagems.
+ * 
+ *  A funcao copia a imagem ORIGEM sobre a imagem DESTINO. 
+    
+ *  A imagem DESTINO já deve ter sido criada antes da chama da
+ *  funcao.  Assim, a memória utilizada por DESTINO ja deve ter
+ *  sido _totalmente_ alocada.
 
 */
 
@@ -172,15 +182,15 @@ copieImagem(Imagem *destino, Imagem *origem)
 }
 
 /*-------------------------------------------------------------
-  getPixel
+ *  getPixel
 
-  Recebe um ponteiro IMG para uma estrutura que representa 
-  uma imagem e uma posicao [LIN][COL] de um pixel.
- 
-  A funcao retorna o pixel da posicao [LIN][COL].
+ *  Recebe um ponteiro IMG para uma estrutura que representa 
+ *  uma imagem e uma posicao [LIN][COL] de um pixel.
+ * 
+ *  A funcao retorna o pixel da posicao [LIN][COL].
 
-  Esta funcao e usada no modulo graphic para exibir a imagem
-  corrente em uma janela.
+ *  Esta funcao e usada no modulo graphic para exibir a imagem
+ *  corrente em uma janela.
 */
 
 Pixel
@@ -196,12 +206,12 @@ getPixel(Imagem *img, int col, int lin)
 }
 
 /*-------------------------------------------------------------
-  setPixel
+ *  setPixel
 
-  Recebe um ponteiro IMG para uma estrutura que representa 
-  uma imagem, uma posicao [LIN][COL] de um pixel e uma COR.
+ *  Recebe um ponteiro IMG para uma estrutura que representa 
+ *  uma imagem, uma posicao [LIN][COL] de um pixel e uma COR.
 
-  A funcao pinta o pixel da posicao [LIN][COL] da cor COR.
+ *  A funcao pinta o pixel da posicao [LIN][COL] da cor COR.
 
 */
 
@@ -214,14 +224,14 @@ setPixel(Imagem *img, int col, int lin, Byte cor[])
 }
 
 /*-------------------------------------------------------------
-  pinteImagem
+ *  pinteImagem
 
-  Recebe um ponteiro IMG para uma estrutura que representa 
-  uma imagem e uma COR.
+ *  Recebe um ponteiro IMG para uma estrutura que representa 
+ *  uma imagem e uma COR.
 
-  A funcao pinta todos os pixels da imagem IMG da cor COR.
+ *  A funcao pinta todos os pixels da imagem IMG da cor COR.
 
-  Esta funcao deve utilizar a funcao setPixel.
+ *  Esta funcao deve utilizar a funcao setPixel.
 */ 
 
 void 
@@ -234,59 +244,76 @@ pinteImagem(Imagem *img, Byte cor[])
 }
 
 /*------------------------------------------------------------- 
-   pinteRegioes
+ *  pinteRegioes
 
-   Recebe um  ponteiro IMG para uma estrutura que representa 
-   uma imagem, um ponteiro INIREGIOES para uma lista de regioes
-   da imagem e uma opcao BORDA que tera o valor TRUE or FALSE.
+ *  Recebe um  ponteiro IMG para uma estrutura que representa 
+ *  uma imagem, um ponteiro INIREGIOES para uma lista de regioes
+ *  da imagem e uma opcao BORDA que tera o valor TRUE or FALSE.
 
-   Se BORDA == FALSE a funcao pinta os pixels de cada regiao da
-       lista INIREGIOES de uma cor "diferente" (uma mesma cor
-       para todos os pixels de uma regiao).
-    
-   Se BORDA == TRUE a funcao pinta os pixels de cada regiao de
-       __borda__ da lista INIREGIOES de uma cor "diferente".
-       (uma mesma cor para todos os pixels de uma regiao).
+ *  Se BORDA == FALSE a funcao pinta os pixels de cada regiao da
+ *      lista INIREGIOES de uma cor "diferente" (uma mesma cor
+ *      para todos os pixels de uma regiao).
+ *   
+ *  Se BORDA == TRUE a funcao pinta os pixels de cada regiao de
+ *      __borda__ da lista INIREGIOES de uma cor "diferente".
+ *      (uma mesma cor para todos os pixels de uma regiao).
 
-   Para fazer o seu servico a funcao percorre a lista INIREGIOES
-   e para cada regiao (dependendo da opcao BORDA) percorre a sua
-   lista de pixels pintando-os de uma cor.
+ *  Para fazer o seu servico a funcao percorre a lista INIREGIOES
+ *  e para cada regiao (dependendo da opcao BORDA) percorre a sua
+ *  lista de pixels pintando-os de uma cor.
 
-   Para pintar as regioes de uma cor "diferente" a funcao utiliza
-   'ciclicamente' as cores na tabela cores[0..NUM_CORES-1]
-   (cores.h):
+ *  Para pintar as regioes de uma cor "diferente" a funcao utiliza
+ *  'ciclicamente' as cores na tabela cores[0..NUM_CORES-1]
+ *  (cores.h):
 
-           cores[0] eh uma cor
-           cores[1] eh outra cor
-           cores[2] eh outra cor 
-           ...
-           cores[NUM_CORES-1] eh outra cor. 
+ *          cores[0] eh uma cor
+ *          cores[1] eh outra cor
+ *          cores[2] eh outra cor 
+ *          ...
+ *          cores[NUM_CORES-1] eh outra cor. 
 
-   A funcao tambem atualiza o campo _cor_ das celulas da lista
-   INIREGIOES que representam regioes que foram pintadas.
+ *  A funcao tambem atualiza o campo _cor_ das celulas da lista
+ *  INIREGIOES que representam regioes que foram pintadas.
 */
 
 void
 pinteRegioes(Imagem *img, CelRegiao *iniRegioes, Bool borda)
 {
-    AVISO(imagem: Vixe! Ainda nao fiz a funcao pinteRegioes.);
+  int cor_atual = 0;
+  CelRegiao* regiao;
+  Byte cor[3];
+  for(regiao = iniRegioes; regiao != NULL; regiao = regiao->proxRegiao) {
+    if(regiao->borda == borda) {
+      // atribui a cor atual
+      cor[RED] = cores[cor_atual][RED];
+      cor[GREEN] = cores[cor_atual][GREEN];
+      cor[BLUE] = cores[cor_atual][BLUE];
+
+      CelPixel* iniPixel = regiao->iniPixels;
+      repinteRegiao(img, iniPixel->col, iniPixel->lin, cor); 
+
+      // atualiza a cor de maneira circular
+      cor_atual++;
+      cor_atual %= NUM_CORES;
+    }
+  }
 }
 
 /*-------------------------------------------------------------
-   repinteRegiao
+ *  repinteRegiao
 
-   Recebe um  ponteiro IMG para uma estrutura que representa 
-   uma imagem, uma posicao [LIN][COL] de um pixel da imagem e
-   uma cor COR.
+ *  Recebe um  ponteiro IMG para uma estrutura que representa 
+ *  uma imagem, uma posicao [LIN][COL] de um pixel da imagem e
+ *  uma cor COR.
 
-   A funcao repinta todos os pixels da imagem IMG que estao na
-   regiao do pixel [LIN][COL] com a cor COR. 
+ *  A funcao repinta todos os pixels da imagem IMG que estao na
+ *  regiao do pixel [LIN][COL] com a cor COR. 
 
-   Para isto a funcao percorre a lista dos pixels que estao 
-   na mesma regiao de [LIN][COL] pintando-os de COR.
+ *  Para isto a funcao percorre a lista dos pixels que estao 
+ *  na mesma regiao de [LIN][COL] pintando-os de COR.
 
-   A funcao tambem atualiza o campo _cor_ da celula que
-   representa a regiao a que o pixel [LIN][COL] pertence.
+ *  A funcao tambem atualiza o campo _cor_ da celula que
+ *  representa a regiao a que o pixel [LIN][COL] pertence.
 */
 
 void
@@ -294,64 +321,76 @@ repinteRegiao(Imagem *img, int col, int lin, Byte cor[])
 {
   CelRegiao* regiao = img->pixel[lin][col].regiao;
   CelPixel* p;
+
   for(p = regiao->iniPixels; p != NULL; p = p->proxPixel) {
     img->pixel[p->lin][p->col].cor[RED] = cor[RED]; 
     img->pixel[p->lin][p->col].cor[GREEN] = cor[GREEN]; 
     img->pixel[p->lin][p->col].cor[BLUE] = cor[BLUE]; 
   }
+
   regiao->cor[RED] = cor[RED]; 
   regiao->cor[GREEN] = cor[GREEN]; 
   regiao->cor[BLUE] = cor[BLUE]; 
 }
 
 /*------------------------------------------------------------- 
-   repinteRegioes
+ *  repinteRegioes
 
-   Recebe um  ponteiro IMG para uma estrutura que representa 
-   uma imagem, um ponteiro INIREGIOES para uma lista de regioes,
-   uma posicao [LIN][COL] de um pixel e uma cor COR.
+ *  Recebe um  ponteiro IMG para uma estrutura que representa 
+ *  uma imagem, um ponteiro INIREGIOES para uma lista de regioes,
+ *  uma posicao [LIN][COL] de um pixel e uma cor COR.
 
-   A funcao repinta os pixels da imagem IMG de 
+ *  A funcao repinta os pixels da imagem IMG de 
 
-       cada regiao que tem a mesma cor que a regiao 
-       do pixel [LIN][COL] com a cor COR.
+ *    cada regiao que tem a mesma cor que a regiao 
+ *    do pixel [LIN][COL] com a cor COR.
 
-   Para isto a funcao percorre a lista INIREGIOES e, 
-   para cada regiao que tem a mesma cor que a _regiao_ do pixel 
-   [LIN][COL], percorre a sua lista pixels repintando-os 
-   de COR.
+ *  Para isto a funcao percorre a lista INIREGIOES e, 
+ *  para cada regiao que tem a mesma cor que a _regiao_ do pixel 
+ *  [LIN][COL], percorre a sua lista pixels repintando-os 
+ *  de COR.
 
-   A funcao tambem atualiza o campo _cor_ das celulas da lista
-   INIREGIOES que representam regioes que foram repintadas.
+ *  A funcao tambem atualiza o campo _cor_ das celulas da lista
+ *  INIREGIOES que representam regioes que foram repintadas.
 */
-
+// apesar de implementada, quando o botão direito é pressionado, apenas
+// a função repinteRegiao é chamada no esqueleto disponibilizado
 void
 repinteRegioes(Imagem *img, CelRegiao *iniRegioes, int col, int lin, 
                Byte cor[])
 {
-    AVISO(imagem: Vixe! Ainda nao fiz a funcao pinteRegioes.);
+  CelRegiao* regiao;
+  for(regiao = iniRegioes; regiao != NULL; regiao = regiao->proxRegiao) {
+    if(cor[RED] == regiao->cor[RED] && cor[GREEN] == regiao->cor[GREEN] &&\
+        cor[BLUE] == regiao->cor[BLUE]) {
+      CelPixel* pixel = regiao->iniPixels;
+      repinteRegiao(img, pixel->col, pixel->lin, cor);
+    }  
+  }
 }
 
 /*------------------------------------------------------------- 
-   pixelBorda
+ *  pixelBorda
 
-   Recebe um  ponteiro IMG para uma estrutura que representa 
-   uma imagem, um posicao [LIN][COL] de um pixel da imagem
-   e um valor LIMIAR.
+ *  Recebe um  ponteiro IMG para uma estrutura que representa 
+ *  uma imagem, um posicao [LIN][COL] de um pixel da imagem
+ *  e um valor LIMIAR.
 
-   A funcao retorna TRUE se o pixel [LIN][COL] for de borda
-   em relacao ao valor LIMIAR.
+ *  A funcao retorna TRUE se o pixel [LIN][COL] for de borda
+ *  em relacao ao valor LIMIAR.
 
-   Esta funcao utiliza a funcao luminosidadePixel().
+ *  Esta funcao utiliza a funcao luminosidadePixel().
 */
 
 static Bool
 pixelBorda(Imagem *img, int limiar, int col, int lin)
 {
+  // retorna verdadeiro para todos os pixels que delimitam a imagem
   if(lin == 0 || col == 0 || lin == img->height - 1 || col == img->width - 1) return 1;
   int i, j;
   int gradX = 0;
   int gradY = 0;
+  // Matrizes bases para a aplicação do gradiente
   static int gX[3][3] = {{-1,0,1},{-2,0,2},{-1,0,1}};
   static int gY[3][3] = {{1,2,1},{0,0,0},{-1,-2,-1}};
   for(i = -1; i <= 1; i++) {
@@ -366,89 +405,89 @@ pixelBorda(Imagem *img, int limiar, int col, int lin)
 }
 
 /*-------------------------------------------------------------
-  segmenteImagem
+ *  segmenteImagem
 
-  Recebe um ponteiro IMG para uma estrutura que representa 
-  uma imagem e um inteiro LIMIAR. 
+ *  Recebe um ponteiro IMG para uma estrutura que representa 
+ *  uma imagem e um inteiro LIMIAR. 
 
-  A funcao retorna um ponteiro para o inicio de uma lista
-  de regioes da imagem (em relacao ao valor LIMIAR). 
+ *  A funcao retorna um ponteiro para o inicio de uma lista
+ *  de regioes da imagem (em relacao ao valor LIMIAR). 
 
-  Cada pixel da imagem deve pertencem a uma, e so uma,
-  regiao. Essas regioes constituem o que se chama de uma
-  _segmentacao_ da imagem.
+ *  Cada pixel da imagem deve pertencem a uma, e so uma,
+ *  regiao. Essas regioes constituem o que se chama de uma
+ *  _segmentacao_ da imagem.
 
-  . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . 
-  Regioes
-  --------
+ *  . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . 
+ *  Regioes
+ *  --------
 
-  Cada regiao da imagem deve ser formada: 
- 
-      -  _apenas_ por pixels de uma _mesma_ regiao de borda  ou 
-      -  _apenas_ por pixels de uma _mesma_ regiao da imagem 
-         limitada por: 
+ *  Cada regiao da imagem deve ser formada: 
+ * 
+ *      -  _apenas_ por pixels de uma _mesma_ regiao de borda  ou 
+ *      -  _apenas_ por pixels de uma _mesma_ regiao da imagem 
+ *         limitada por: 
 
-          . pixels de borda ou
-          . pela fronteira da imagem. 
+ *          . pixels de borda ou
+ *          . pela fronteira da imagem. 
 
-  Lista de regioes
-  ----------------
- 
-  Cada celula da lista de regioes devolvida e do tipo CelRegiao.
-  Os campos de cada nova celula que devem ser preenchidos pela 
-  funcao sao: 
- 
-      - nPixels: contem o numero de pixels na regiao (pixelsRegiao())
-      - borda: indica se a regiao e de borda (pixelBorda())
-      - iniPixels: ponteiro para o inicio da lista de pixels que 
-            formam a regiao (pixelsRegiao())
-      - proxRegiao: ponteiro para proxima celula 
-            
-  Em particular, esta funcao nao deve preencher o campo 
+ *  Lista de regioes
+ *  ----------------
+ * 
+ *  Cada celula da lista de regioes devolvida e do tipo CelRegiao.
+ *  Os campos de cada nova celula que devem ser preenchidos pela 
+ *  funcao sao: 
+ * 
+ *      - nPixels: contem o numero de pixels na regiao (pixelsRegiao())
+ *      - borda: indica se a regiao e de borda (pixelBorda())
+ *      - iniPixels: ponteiro para o inicio da lista de pixels que 
+ *            formam a regiao (pixelsRegiao())
+ *      - proxRegiao: ponteiro para proxima celula 
+ *            
+ *  Em particular, esta funcao nao deve preencher o campo 
 
-      - cor: cor dos pixels da regiao,
+ *      - cor: cor dos pixels da regiao,
 
-  (Esse tarefa sera feita pela funcao pinteRegioes().)
+ *  (Esse tarefa sera feita pela funcao pinteRegioes().)
 
-  Lista de pixels de uma regiao
-  -----------------------------
+ *  Lista de pixels de uma regiao
+ *  -----------------------------
 
-  Para obter a lista de pixels em uma mesma regiao, esta funcao
-  deve utilizar a funcao pixelsRegiao() que cria e devolve a
-  lista de pixels de uma mesma regiao.
+ *  Para obter a lista de pixels em uma mesma regiao, esta funcao
+ *  deve utilizar a funcao pixelsRegiao() que cria e devolve a
+ *  lista de pixels de uma mesma regiao.
 
-  O servico feito pela funcao pixelsRegiao() sera utilizado 
-  para atribuir os valores dos campos nPixels e iniPixels de
-  cada celula da lista de regioes.
+ *  O servico feito pela funcao pixelsRegiao() sera utilizado 
+ *  para atribuir os valores dos campos nPixels e iniPixels de
+ *  cada celula da lista de regioes.
 
-  Ponteiros de pixels para regioes
-  --------------------------------
-  
-  O campo _regiao_ de cada pixel [lin][col] da imagem IMG devera
-  ser utilizado para indicar se o pixel [lin][col] ja pertencem a
-  uma regiao (ou, utilizandi outro jargao, se ja foi ou nao
-  _visitado_):
+ *  Ponteiros de pixels para regioes
+ *  --------------------------------
+ *  
+ *  O campo _regiao_ de cada pixel [lin][col] da imagem IMG devera
+ *  ser utilizado para indicar se o pixel [lin][col] ja pertencem a
+ *  uma regiao (ou, utilizandi outro jargao, se ja foi ou nao
+ *  _visitado_):
 
-     - IMG->pixel[lin][col].regiao == NULL 
-       
-       indica que o pixel [lin][col] ainda nao foi atribuido a
-       uma regiao (= nao foi visitado)
+ *     - IMG->pixel[lin][col].regiao == NULL 
+ *       
+ *       indica que o pixel [lin][col] ainda nao foi atribuido a
+ *       uma regiao (= nao foi visitado)
 
-  Pixels de borda
-  ---------------
+ *  Pixels de borda
+ *  ---------------
 
-  Para decidir se um pixel [lin][col] eh ou nao de borda devera
-  ser utilizada a funcao pixelBorda(). 
+ *  Para decidir se um pixel [lin][col] eh ou nao de borda devera
+ *  ser utilizada a funcao pixelBorda(). 
 
-  Para fazer o seu servico a funcao pixelBorda() utiliza o valor
-  LIMIAR.  Um pixel eh ou nao considerado de borda em relacao ao
-  dado LIMIAR.
+ *  Para fazer o seu servico a funcao pixelBorda() utiliza o valor
+ *  LIMIAR.  Um pixel eh ou nao considerado de borda em relacao ao
+ *  dado LIMIAR.
 
-  mallocSafe
-  ----------
+ *  mallocSafe
+ *  ----------
 
-  Esta funcao deve utilizar a funcao mallocSafe() para criar cada
-  celula da lista de regioes.
+ *  Esta funcao deve utilizar a funcao mallocSafe() para criar cada
+ *  celula da lista de regioes.
 
 */
 
@@ -460,8 +499,16 @@ segmenteImagem(Imagem *img, int limiar)
   CelRegiao* regiao = NULL;
   CelRegiao* anterior = NULL;
 
-  for(lin = 0; lin < img->height; ++lin) {
-    for(col = 0; col < img->width; ++col) {
+  // reseta a regiao de cada pixel no caso de resegmentação
+  lin = col = 0;
+  if(img->pixel[lin][col].regiao != NULL) {
+    for(lin = 0; lin < img->height; lin++)
+      for(col = 0; col < img->width; col++)
+        img->pixel[lin][col].regiao = NULL;
+  }
+
+  for(lin = 0; lin < img->height; lin++) {
+    for(col = 0; col < img->width; col++) {
       if(img->pixel[lin][col].regiao == NULL) {
         regiao = (CelRegiao*)malloc(sizeof(CelRegiao));
 
@@ -485,7 +532,7 @@ segmenteImagem(Imagem *img, int limiar)
 
         // Realiza segmentação utilizando o pixel atual como semente
         regiao->nPixels = pixelsRegiao(img, limiar, col, lin, regiao);
-        //fprintf(stdout, "Grupo %d: %d pixels\n", grupo, regiao->nPixels);
+        fprintf(stdout, "Grupo %d: %d pixels\n", grupo, regiao->nPixels);
 
         // Utiliza a regiao anterior para encadear a lista de regiões
         anterior = regiao;
@@ -497,117 +544,117 @@ segmenteImagem(Imagem *img, int limiar)
 }
 
 /*------------------------------------------------------------- 
-  pixelsRegiao
+ *  pixelsRegiao
 
-  Recebe 
-   
-      - um  ponteiro IMG para uma estrutura que representa 
-        uma imagem
-      - uma inteiro LIMIAR 
-      - uma posicao [LIN][COL] de um pixel, 
-      - um  ponteiro REGIAO para uma celula que representa
-        uma regiao da imagem cuja lista de pixels Regiao->iniPixels 
-        esta sendo construida (recursivamente pela funcao).
+ *  Recebe 
+ *   
+ *      - um  ponteiro IMG para uma estrutura que representa 
+ *        uma imagem
+ *      - uma inteiro LIMIAR 
+ *      - uma posicao [LIN][COL] de um pixel, 
+ *      - um  ponteiro REGIAO para uma celula que representa
+ *        uma regiao da imagem cuja lista de pixels Regiao->iniPixels 
+ *        esta sendo construida (recursivamente pela funcao).
 
-  Visitando pixels a partir de posicao [LIN][COL], a funcao
-  insere na lista REGIAO->iniPixels novas celulas correspondentes
-  a pixels que ainda nao pertencem a regiao alguma (no jargao
-  popular, ainda nao foram visitados pela funcao) e que estao na
-  regiao representada por REGIAO.
+ *  Visitando pixels a partir de posicao [LIN][COL], a funcao
+ *  insere na lista REGIAO->iniPixels novas celulas correspondentes
+ *  a pixels que ainda nao pertencem a regiao alguma (no jargao
+ *  popular, ainda nao foram visitados pela funcao) e que estao na
+ *  regiao representada por REGIAO.
 
-  A funcao retorna o numero de (novas) celulas inseridas na lista
-  REGIAO->iniPixels.
+ *  A funcao retorna o numero de (novas) celulas inseridas na lista
+ *  REGIAO->iniPixels.
 
-  . . . . . . . . . . . . . . . . . . . . . . . . . . . . . 
-  Recursao 
-  --------
-   
-  Os pixels inseridos na lista REGIAO->iniPixels devem ser obtidos
-  RECURSIVAMENTE visitando-se (=examinando-se)
+ *  . . . . . . . . . . . . . . . . . . . . . . . . . . . . . 
+ *  Recursao 
+ *  --------
+ *   
+ *  Os pixels inseridos na lista REGIAO->iniPixels devem ser obtidos
+ *  RECURSIVAMENTE visitando-se (=examinando-se)
 
-      - o pixel da posicao [LIN][COL]
- 
-      - os vizinhos do pixel da posicao [LIN][COL] que sao 
-        do mesmo tipo de REGIAO->borda (borda ou nao borda) 
-        e ainda nao foram visitados 
+ *      - o pixel da posicao [LIN][COL]
+ * 
+ *      - os vizinhos do pixel da posicao [LIN][COL] que sao 
+ *        do mesmo tipo de REGIAO->borda (borda ou nao borda) 
+ *        e ainda nao foram visitados 
 
-      - os vizinhos dos vizinhos da posicao [LIN][COL] que sao do
-        mesmo tipo de REGIAO->borda (borda ou nao borda) e ainda
-        nao foram visitados
+ *      - os vizinhos dos vizinhos da posicao [LIN][COL] que sao do
+ *        mesmo tipo de REGIAO->borda (borda ou nao borda) e ainda
+ *        nao foram visitados
 
-      - os vizinhos, dos vizinhos, dos vizinhos ...
+ *      - os vizinhos, dos vizinhos, dos vizinhos ...
 
-      - ...
- 
-  Vizinhanca de um pixel
-  ----------------------
+ *      - ...
+ * 
+ *  Vizinhanca de um pixel
+ *  ----------------------
 
-  O conjunto de vizinhos de um pixel depende do tipo da regiao
-  (valor de REGIAO->borda) e da sua posicao (canto ou centro ou
-  ...).
+ *  O conjunto de vizinhos de um pixel depende do tipo da regiao
+ *  (valor de REGIAO->borda) e da sua posicao (canto ou centro ou
+ *  ...).
 
-  Se REGIAO-BORDA == FALSE, os vizinhos de um pixel sao os pixels 
-  de cima, de baixo, da esquerda e direita (vizinha da torre no 
-  EP4 de MAC2166, edicao 2014). 
-  Nessa caso um pixel pode ter ate 4 vizinhos.
+ *  Se REGIAO-BORDA == FALSE, os vizinhos de um pixel sao os pixels 
+ *  de cima, de baixo, da esquerda e direita (vizinha da torre no 
+ *  EP4 de MAC2166, edicao 2014). 
+ *  Nessa caso um pixel pode ter ate 4 vizinhos.
 
-  Se REGIAO-BORDA == TRUE, os vizinhos de um pixel sao os pixels
-  de cima, de baixo, da esquerda e direita e das quatro diagonais
-  (vizinha do rei no EP4 de MAC2166, edicao 2014).  
+ *  Se REGIAO-BORDA == TRUE, os vizinhos de um pixel sao os pixels
+ *  de cima, de baixo, da esquerda e direita e das quatro diagonais
+ *  (vizinha do rei no EP4 de MAC2166, edicao 2014).  
 
-  Nessa caso um pixel pode ter ate 8 vizinhos.
+ *  Nessa caso um pixel pode ter ate 8 vizinhos.
 
-  Regiao 
-  ------
+ *  Regiao 
+ *  ------
 
-  O tipo dos pixels que devem ser inseridos em REGIAO->iniPixels
-  depende do valor de REGIAO->borda:
+ *  O tipo dos pixels que devem ser inseridos em REGIAO->iniPixels
+ *  depende do valor de REGIAO->borda:
 
-     TRUE:  os pixels     devem ser de borda
-     FALSE: os pixels nao devem ser de borda.
+ *     TRUE:  os pixels     devem ser de borda
+ *     FALSE: os pixels nao devem ser de borda.
 
-  Cada celula da lista REGIAO->iniPixels eh do tipo CelPixel.
-  Assim, os campos de cada nova celula a serem preenchidos sao: 
- 
-      - col, lin: [lin][col] e posicao do pixel na imagem 
-      - proxPixel: ponteiro para a proxima celula
+ *  Cada celula da lista REGIAO->iniPixels eh do tipo CelPixel.
+ *  Assim, os campos de cada nova celula a serem preenchidos sao: 
+ * 
+ *      - col, lin: [lin][col] e posicao do pixel na imagem 
+ *      - proxPixel: ponteiro para a proxima celula
 
-  Ponteiros de pixels para regioes
-  --------------------------------
-  
-  O campo _regiao_ de cada pixel [lin][col] da imagem IMG devera
-  ser utilizado para indicar se o pixel [lin][col] ja pertencem a
-  uma regiao (ja foi ou nao visitado):
+ *  Ponteiros de pixels para regioes
+ *  --------------------------------
+ *  
+ *  O campo _regiao_ de cada pixel [lin][col] da imagem IMG devera
+ *  ser utilizado para indicar se o pixel [lin][col] ja pertencem a
+ *  uma regiao (ja foi ou nao visitado):
 
-     - IMG->pixel[lin][col].regiao == NULL 
-       
-       indica que o pixel [lin][col] ainda nao foi atribuido a
-       uma regiao (= nao foi visitado)
+ *     - IMG->pixel[lin][col].regiao == NULL 
+ *       
+ *       indica que o pixel [lin][col] ainda nao foi atribuido a
+ *       uma regiao (= nao foi visitado)
 
-     - IMG->pixel[lin][col].regiao != NULL 
+ *     - IMG->pixel[lin][col].regiao != NULL 
 
-       significa que o pixel [lin][col] esta na regiao
-       correspondente a celula IMG->pixel[lin][col].regiao da
-       lista de regioes (= ja foi visitado).
+ *       significa que o pixel [lin][col] esta na regiao
+ *       correspondente a celula IMG->pixel[lin][col].regiao da
+ *       lista de regioes (= ja foi visitado).
 
-  Assim que um pixel [lin][col] e inserido em uma regiao o 
-  seu campo regiao deve ser atualizado.
+ *  Assim que um pixel [lin][col] e inserido em uma regiao o 
+ *  seu campo regiao deve ser atualizado.
 
-  Pixels de borda
-  ---------------
+ *  Pixels de borda
+ *  ---------------
 
-  Para decidir se um pixel [lin][col] eh ou nao de borda devera
-  ser utilizada a funcao pixelBorda(). 
+ *  Para decidir se um pixel [lin][col] eh ou nao de borda devera
+ *  ser utilizada a funcao pixelBorda(). 
 
-  Para fazer o seu servico a funcao pixelBorda() utiliza o valor
-  LIMIAR.  Um pixel eh ou nao considerado de borda em relacao ao
-  dado LIMIAR.
+ *  Para fazer o seu servico a funcao pixelBorda() utiliza o valor
+ *  LIMIAR.  Um pixel eh ou nao considerado de borda em relacao ao
+ *  dado LIMIAR.
 
-  mallocSafe
-  ----------
+ *  mallocSafe
+ *  ----------
 
-  Esta funcao deve utilizar a funcao mallocSafe para criar cada
-  celula da lista de pixels.
+ *  Esta funcao deve utilizar a funcao mallocSafe para criar cada
+ *  celula da lista de pixels.
 
 */
 
@@ -631,7 +678,7 @@ pixelsRegiao(Imagem *img, int limiar, int col, int lin, CelRegiao *regiao)
   pixel->proxPixel = p;
   regiao->iniPixels = pixel;
 
-  /* se for de borda, visita os pixels da diagonal adjacente */
+  // se for de borda, visita os pixels da diagonal adjacente 
   if(pixelBorda(img, limiar, col, lin)) {
     for(i = -1; i <= 1; i += 2) {
       if(estaDentro(lin + i, col + i, img->height, img->width)) {
@@ -645,7 +692,7 @@ pixelsRegiao(Imagem *img, int limiar, int col, int lin, CelRegiao *regiao)
     }
   }
 
-  /* visita os pixels vertical e horizontalmente adjacentes*/
+  // visita os pixels vertical e horizontalmente adjacentes
   for(i = -1; i <= 1; i += 2) {
     if(estaDentro(lin + i, col, img->height, img->width)) {
       if(img->pixel[lin + i][col].regiao == NULL)
@@ -670,15 +717,15 @@ pixelsRegiao(Imagem *img, int limiar, int col, int lin, CelRegiao *regiao)
 /*-------------------------------------------------------------*/ 
 
 /*-------------------------------------------------------------  
-   mallocSafe 
-   
-   O parâmetro de mallocSafe é do tipo size_t.  
-   Em muitos computadores, size_t é equivalente a unsigned int.  
-   A função mallocSafe não está em nenhuma biblioteca e é desconhecida 
-   fora destas notas de aula. 
-   Ela é apenas uma abreviatura conveniente.
+ *  mallocSafe 
+ *  
+ *  O parâmetro de mallocSafe é do tipo size_t.  
+ *  Em muitos computadores, size_t é equivalente a unsigned int.  
+ *  A função mallocSafe não está em nenhuma biblioteca e é desconhecida 
+ *  fora destas notas de aula. 
+ *  Ela é apenas uma abreviatura conveniente.
 
-   Fonte:  http://www.ime.usp.br/~pf/algoritmos/aulas/aloca.html
+ *  Fonte:  http://www.ime.usp.br/~pf/algoritmos/aulas/aloca.html
 */
 static void *
 mallocSafe(size_t nbytes)
@@ -697,20 +744,20 @@ mallocSafe(size_t nbytes)
 
 
 /*-------------------------------------------------------------  
-   luminosidadePixel
+ *  luminosidadePixel
 
-   Recebe um  ponteiro IMG para uma estrutura que representa 
-   uma imagem, e a posicao [H][W] de um pixe da imagem
-   e retorna a sua luminosidade de acordo com a formula
+ *  Recebe um  ponteiro IMG para uma estrutura que representa 
+ *  uma imagem, e a posicao [H][W] de um pixe da imagem
+ *  e retorna a sua luminosidade de acordo com a formula
 
-   luminosidade: (0.21 * r) + (0.72 * g) + (0.07 * b)
+ *  luminosidade: (0.21 * r) + (0.72 * g) + (0.07 * b)
 
-   http://www.johndcook.com/blog/2009/08/24/algorithms-convert-color-grayscale/ 
-   http://en.wikipedia.org/wiki/Relative_luminance
+ *  http://www.johndcook.com/blog/2009/08/24/algorithms-convert-color-grayscale/ 
+ *  http://en.wikipedia.org/wiki/Relative_luminance
 
-   Y = 0.2126 R + 0.7152 G + 0.0722 B
+ *  Y = 0.2126 R + 0.7152 G + 0.0722 B
 
-   Nota: a outras formulas para luminosidade por ai... 
+ *  Nota: a outras formulas para luminosidade por ai... 
 */
 static double 
 luminosidadePixel(Imagem *img, int col, int lin)

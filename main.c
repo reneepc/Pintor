@@ -12,9 +12,6 @@
   Nome: Renê Edurado Pereira Cardozo
   NUSP: 9797315
 
-  // Não consegui fazer a função de segmentação das imagens, apesar da função pixelBorda aparentemente
-  // funcionar. Assumi que a imagem estava segmentada e prossegui fazendo as outras funções de tratamento
-  // das listas ligadas.
   Referências: Com exceção das rotinas fornecidas no esqueleto e em sala
   de aula, caso você tenha utilizado alguma refência, liste-as abaixo
   para que o seu programa não seja considerada plágio.
@@ -118,8 +115,8 @@ main(int argc, char *argv[])
 void 
 quit(Imagem *tela, Imagem *img, CelRegiao *iniRegioes)
 {
-  freeImagem(img);
   freeRegioes(iniRegioes);
+  freeImagem(img);
   exit(EXIT_SUCCESS); /* a execução do programa termina neste ponto */
 }
 
