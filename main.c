@@ -45,7 +45,7 @@
 
 /* suposto numero maximo de caracteres em um nome de arquivo */
 #define MAX_NOME 128
-#define MAX 258
+#define MAX 1024
 
 /*---------------------------------------------------------------*/
 /*
@@ -63,33 +63,32 @@ mostreUso(char *nomePrograma);
 int 
 main(int argc, char *argv[])
 {
-    /* 1. pegue da linha de comando o nome do arquivo com a imagem */
-    if(argc < 2) {
-      mostreUso("ep2"); 
-    }
-    /* 2. carregue de uma arquivo, no formato PPM, a imagem original */
-    /* 3 crie a imagem corrente (tela) em que trabalharemos */
-    Imagem *imgOriginal   = leImagem(argv[1]); /* ponteiro para a imagem original */
-    Imagem *tela          = mallocImagem(imgOriginal->width, imgOriginal->height); /* ponteiro para a imagem corrente ou atual */
-    CelRegiao *iniRegioes = NULL; /* ponteiro para a lista de regioes */
+  /* 1. pegue da linha de comando o nome do arquivo com a imagem */
+  if(argc < 2) {
+    mostreUso("ep2"); 
+  }
 
-    /* 4 copie a imagem original (lida) para a imagem corrente (tela) */ 
-    copieImagem(tela, imgOriginal);
+  /* 2. carregue de uma arquivo, no formato PPM, a imagem original */
+  /* 3 crie a imagem corrente (tela) em que trabalharemos */
+  Imagem *imgOriginal   = leImagem(argv[1]); /* ponteiro para a imagem original */
+  Imagem *tela          = mallocImagem(imgOriginal->width, imgOriginal->height); /* ponteiro para a imagem corrente ou atual */
+  CelRegiao *iniRegioes = NULL; /* ponteiro para a lista de regioes */
 
-    /* 5 segmente a imagem corrente (tela) criando a lista de regioes */
+  /* 4 copie a imagem original (lida) para a imagem corrente (tela) */ 
+  copieImagem(tela, imgOriginal);
 
-    if (iniRegioes == NULL) 
-    {
-        iniRegioes = segmenteImagem(tela, LIMIAR);
-        /* apesar disso ainda e possivel visualizar a imagem lida,
-           vamos em frente */
-    }
+  /* 5 segmente a imagem corrente (tela) criando a lista de regioes */
 
-    /* 6 passe a bola para a parte grafica */  
-    myInit(&argc, argv, tela, imgOriginal, iniRegioes);
-  
-    return 0; /* we never return here; this just keeps the compiler happy
-                 http://www.cs.umd.edu/class/fall2011/cmsc427/lectures.shtml */
+  if (iniRegioes == NULL) 
+  {
+    iniRegioes = segmenteImagem(tela, LIMIAR);
+  }
+
+  /* 6 passe a bola para a parte grafica */  
+  myInit(&argc, argv, tela, imgOriginal, iniRegioes);
+
+  return 0; /* we never return here; this just keeps the compiler happy
+               http://www.cs.umd.edu/class/fall2011/cmsc427/lectures.shtml */
 }
 
 /*---------------------------------------------------------------*/
@@ -119,8 +118,9 @@ main(int argc, char *argv[])
 void 
 quit(Imagem *tela, Imagem *img, CelRegiao *iniRegioes)
 {
-    AVISO(main.c: Vixe Ainda nao fiz a funcao quit.);
-    exit(EXIT_SUCCESS); /* a execução do programa termina neste ponto */
+  freeImagem(img);
+  freeRegioes(iniRegioes);
+  exit(EXIT_SUCCESS); /* a execução do programa termina neste ponto */
 }
 
 /*---------------------------------------------------------------*/
@@ -142,11 +142,9 @@ quit(Imagem *tela, Imagem *img, CelRegiao *iniRegioes)
 void
 graveImagem(Imagem *img)
 {
-  int lin, col;
   char nome_arquivo[MAX_NOME];
   fprintf(stdout, "Digite o nome do arquivo no qual será guardada a imagem: ");
   scanf("%s", nome_arquivo);
-  FILE* arquivo = fopen(nome_arquivo, "w");
 
   graveImagemPPM(nome_arquivo, img);
 }
@@ -160,55 +158,43 @@ graveImagem(Imagem *img)
 static void 
 mostreUso(char *nomePrograma)
 {
-    fprintf(stderr,"%s: Uso \n"
-            "meu_prompt> %s <nome arq. imagem>\n"
-            "    <nome arq. image> = nome arq. com Portable PixMap Binary.\n",
-            nomePrograma, nomePrograma);
+  fprintf(stderr,"%s: Uso \n"
+          "meu_prompt> %s <nome arq. imagem>\n"
+          "    <nome arq. image> = nome arq. com Portable PixMap Binary.\n",
+          nomePrograma, nomePrograma);
 }
 
 
 Imagem* leImagem(char* nome_arquivo) {
-    char buf[MAX];
-    int width, height, max_cor;
-    int linha, coluna;
-    Imagem* img;
+  char buf[MAX];
+  int width, height, max_cor;
+  int linha, coluna;
+  Imagem* img;
 
-    FILE* arquivo;
-    arquivo = fopen(nome_arquivo, "r");
+  FILE* arquivo;
+  arquivo = fopen(nome_arquivo, "r");
 
-    /* Pula os caracteres P6 no início do arquivo */
-    fgets(buf, MAX, arquivo);
-    /* Verifica se a linha não é um comentário e então armazena seu conteudo*/ 
-    do {
-        fgets(buf, MAX, arquivo);
-    } while(buf[0] == '#');
-    sscanf(buf, "%d %d", &width, &height);
+  /* Pula os caracteres P6 no início do arquivo */
+  fgets(buf, MAX, arquivo);
 
-    do {
-        fgets(buf, MAX, arquivo);
-    } while(buf[0] == '#');
-    sscanf(buf, "%d", &max_cor);
+  /* Verifica se a linha não é um comentário e então armazena seu conteudo*/ 
+  do {
+      fgets(buf, MAX, arquivo);
+  } while(buf[0] == '#');
+  sscanf(buf, "%d %d", &width, &height);
 
-    img = mallocImagem(width, height);
-    for(linha = 0; linha < img->height; linha++)
-        for(coluna = 0; coluna < img->width; coluna++) {
-            img->pixel[linha][coluna].cor[RED] = fgetc(arquivo);
-            img->pixel[linha][coluna].cor[GREEN] = fgetc(arquivo);
-            img->pixel[linha][coluna].cor[BLUE] = fgetc(arquivo);
-        }
-    return img;
-}
+  do {
+      fgets(buf, MAX, arquivo);
+  } while(buf[0] == '#');
+  sscanf(buf, "%d", &max_cor);
 
-void imprime_lista(CelRegiao* regiao) {
-
-  if(regiao->borda)
-    fprintf(stdout, "Estamos em uma região de borda\n");
-  else
-    fprintf(stdout, "Estamos em uma região que não é de borda\n");
-
-  fprintf(stdout, "O número de pixel da região é de: %d", regiao->nPixels);
-
-  CelPixel* p;
-  for(p = regiao->iniPixels; p != NULL; p = p->proxPixel)
-    fprintf(stdout, " (%d,%d) ", p->lin, p->col);
+  // leitura dos pixels individualmente
+  img = mallocImagem(width, height);
+  for(linha = 0; linha < img->height; linha++)
+    for(coluna = 0; coluna < img->width; coluna++) {
+      img->pixel[linha][coluna].cor[RED] = fgetc(arquivo);
+      img->pixel[linha][coluna].cor[GREEN] = fgetc(arquivo);
+      img->pixel[linha][coluna].cor[BLUE] = fgetc(arquivo);
+    }
+  return img;
 }

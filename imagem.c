@@ -93,17 +93,17 @@ static int corIgual(Pixel pixel1, CelRegiao* regiao);
 Imagem *
 mallocImagem(int width, int height)
 {
-    int row;
-    Imagem* imagem = (Imagem*)mallocSafe(sizeof(Imagem));
-    imagem->width = width;
-    imagem->height = height;
+  int row;
+  Imagem* imagem = (Imagem*)mallocSafe(sizeof(Imagem));
+  imagem->width = width;
+  imagem->height = height;
 
-    imagem->pixel = (Pixel**)mallocSafe(sizeof(Pixel*) * height);
-    for(row = 0; row < height; row++) {
-        imagem->pixel[row] = (Pixel*)mallocSafe(sizeof(Pixel) * width);
-    }
+  imagem->pixel = (Pixel**)mallocSafe(sizeof(Pixel*) * height);
+  for(row = 0; row < height; row++) {
+    imagem->pixel[row] = (Pixel*)mallocSafe(sizeof(Pixel) * width);
+  }
 
-    return imagem;
+  return imagem;
 }
 
 
@@ -119,11 +119,11 @@ mallocImagem(int width, int height)
 void
 freeImagem(Imagem *img)
 {
-    int row;
-    for(row = 0; row < img->height; row++)
-        free(img->pixel[row]);
-    free(img->pixel);
-    free(img);
+  int row;
+  for(row = 0; row < img->height; row++)
+    free(img->pixel[row]);
+  free(img->pixel);
+  free(img);
 }
 
 
@@ -161,14 +161,14 @@ freeRegioes(CelRegiao *iniRegioes)
 void 
 copieImagem(Imagem *destino, Imagem *origem)
 {
-    int linha, coluna;
-    for(linha = 0; linha < origem->height; linha++)
-        for(coluna = 0; coluna < origem->width; coluna++) {
-            destino->pixel[linha][coluna].cor[RED] = origem->pixel[linha][coluna].cor[RED];
-            destino->pixel[linha][coluna].cor[GREEN] = origem->pixel[linha][coluna].cor[GREEN];
-            destino->pixel[linha][coluna].cor[BLUE] = origem->pixel[linha][coluna].cor[BLUE];
-            destino->pixel[linha][coluna].regiao = NULL;
-        }
+  int linha, coluna;
+  for(linha = 0; linha < origem->height; linha++)
+    for(coluna = 0; coluna < origem->width; coluna++) {
+      destino->pixel[linha][coluna].cor[RED] = origem->pixel[linha][coluna].cor[RED];
+      destino->pixel[linha][coluna].cor[GREEN] = origem->pixel[linha][coluna].cor[GREEN];
+      destino->pixel[linha][coluna].cor[BLUE] = origem->pixel[linha][coluna].cor[BLUE];
+      destino->pixel[linha][coluna].regiao = NULL;
+    }
 }
 
 /*-------------------------------------------------------------
@@ -186,19 +186,13 @@ copieImagem(Imagem *destino, Imagem *origem)
 Pixel
 getPixel(Imagem *img, int col, int lin)
 {
-    /* 
-       O objetivo das linhas de codigo a seguir e evitar que 
-       ocorra erro de sintaxe durante a fase de desenvolvimento 
-       do EP. Essas linhas deverao ser removidas depois que
-       a funcao estiver pronta.
-    */
-    Pixel pixel; 
-    pixel.cor[RED] = img->pixel[lin][col].cor[RED];
-    pixel.cor[GREEN] = img->pixel[lin][col].cor[GREEN];
-    pixel.cor[BLUE] = img->pixel[lin][col].cor[BLUE];
-    pixel.regiao = img->pixel[lin][col].regiao;
-    
-    return pixel;    
+  Pixel pixel; 
+  pixel.cor[RED] = img->pixel[lin][col].cor[RED];
+  pixel.cor[GREEN] = img->pixel[lin][col].cor[GREEN];
+  pixel.cor[BLUE] = img->pixel[lin][col].cor[BLUE];
+  pixel.regiao = img->pixel[lin][col].regiao;
+  
+  return pixel;    
 }
 
 /*-------------------------------------------------------------
@@ -214,9 +208,9 @@ getPixel(Imagem *img, int col, int lin)
 static void
 setPixel(Imagem *img, int col, int lin, Byte cor[])
 {
-    img->pixel[lin][col].cor[RED] = cor[RED];
-    img->pixel[lin][col].cor[GREEN] = cor[GREEN];
-    img->pixel[lin][col].cor[BLUE] = cor[BLUE];
+  img->pixel[lin][col].cor[RED] = cor[RED];
+  img->pixel[lin][col].cor[GREEN] = cor[GREEN];
+  img->pixel[lin][col].cor[BLUE] = cor[BLUE];
 }
 
 /*-------------------------------------------------------------
@@ -233,10 +227,10 @@ setPixel(Imagem *img, int col, int lin, Byte cor[])
 void 
 pinteImagem(Imagem *img, Byte cor[])
 {
-    int linha, coluna;
-    for(linha = 0; linha < img->height; linha++)
-        for(coluna = 0; coluna < img->width; coluna++)
-            setPixel(img, coluna, linha, cor);
+  int linha, coluna;
+  for(linha = 0; linha < img->height; linha++)
+    for(coluna = 0; coluna < img->width; coluna++)
+      setPixel(img, coluna, linha, cor);
 }
 
 /*------------------------------------------------------------- 
@@ -298,7 +292,16 @@ pinteRegioes(Imagem *img, CelRegiao *iniRegioes, Bool borda)
 void
 repinteRegiao(Imagem *img, int col, int lin, Byte cor[])
 {
-    AVISO(imagem: Vixe! Ainda nao fiz a funcao pinteRegiao.);
+  CelRegiao* regiao = img->pixel[lin][col].regiao;
+  CelPixel* p;
+  for(p = regiao->iniPixels; p != NULL; p = p->proxPixel) {
+    img->pixel[p->lin][p->col].cor[RED] = cor[RED]; 
+    img->pixel[p->lin][p->col].cor[GREEN] = cor[GREEN]; 
+    img->pixel[p->lin][p->col].cor[BLUE] = cor[BLUE]; 
+  }
+  regiao->cor[RED] = cor[RED]; 
+  regiao->cor[GREEN] = cor[GREEN]; 
+  regiao->cor[BLUE] = cor[BLUE]; 
 }
 
 /*------------------------------------------------------------- 
@@ -352,12 +355,12 @@ pixelBorda(Imagem *img, int limiar, int col, int lin)
   static int gX[3][3] = {{-1,0,1},{-2,0,2},{-1,0,1}};
   static int gY[3][3] = {{1,2,1},{0,0,0},{-1,-2,-1}};
   for(i = -1; i <= 1; i++) {
-      for(j = -1; j <= 1; j++) {
-          if(estaDentro(lin + i, col + j, img->height, img->width)) {
-              gradX += luminosidadePixel(img, col + i, lin + j) * gX[i + 1][j + 1];
-              gradY += luminosidadePixel(img, col + i, lin + j) * gY[i + 1][j + 1];
-          }
+    for(j = -1; j <= 1; j++) {
+      if(estaDentro(lin + i, col + j, img->height, img->width)) {
+        gradX += luminosidadePixel(img, col + i, lin + j) * gX[i + 1][j + 1];
+        gradY += luminosidadePixel(img, col + i, lin + j) * gY[i + 1][j + 1];
       }
+    }
   }
   return (gradX*gradX + gradY*gradY) > (limiar * limiar);
 }
@@ -453,6 +456,7 @@ CelRegiao *
 segmenteImagem(Imagem *img, int limiar)
 {
   int lin, col;
+  int grupo = 1;
   CelRegiao* regiao = NULL;
   CelRegiao* anterior = NULL;
 
@@ -479,9 +483,13 @@ segmenteImagem(Imagem *img, int limiar)
         else
           regiao->borda = FALSE;
 
+        // Realiza segmentação utilizando o pixel atual como semente
         regiao->nPixels = pixelsRegiao(img, limiar, col, lin, regiao);
-        fprintf(stdout, "Pixels: %d", regiao->nPixels);
+        //fprintf(stdout, "Grupo %d: %d pixels\n", grupo, regiao->nPixels);
+
+        // Utiliza a regiao anterior para encadear a lista de regiões
         anterior = regiao;
+        grupo++;
       }
     } 
   }
@@ -612,8 +620,10 @@ pixelsRegiao(Imagem *img, int limiar, int col, int lin, CelRegiao *regiao)
   int i;
   int pixels = 1;
   
-  // Adiciona pixel atual ao início da lista de pixels da lista CelRegiao
+  // adiciona pixel atual ao início da lista de pixels da lista CelRegiao
   img->pixel[lin][col].regiao = regiao;
+
+  // cria celula que será adicionada na regiao
   CelPixel* pixel = (CelPixel*)malloc(sizeof(CelPixel));
   CelPixel* p = regiao->iniPixels;
   pixel->lin = lin;
@@ -622,7 +632,7 @@ pixelsRegiao(Imagem *img, int limiar, int col, int lin, CelRegiao *regiao)
   regiao->iniPixels = pixel;
 
   /* se for de borda, visita os pixels da diagonal adjacente */
-  if(pixelBorda(img, limiar, col, lin) && regiao->borda) {
+  if(pixelBorda(img, limiar, col, lin)) {
     for(i = -1; i <= 1; i += 2) {
       if(estaDentro(lin + i, col + i, img->height, img->width)) {
         if(img->pixel[lin + i][col + i].regiao == NULL)
@@ -673,16 +683,16 @@ pixelsRegiao(Imagem *img, int limiar, int col, int lin, CelRegiao *regiao)
 static void *
 mallocSafe(size_t nbytes)
 {
-    void *ptr;
+  void *ptr;
 
-    ptr = malloc (nbytes);
-    if (ptr == NULL) 
-    {
-        fprintf (stderr, "Socorro! malloc devolveu NULL!\n");
-        exit (EXIT_FAILURE_MALLOC);
-    }
+  ptr = malloc (nbytes);
+  if (ptr == NULL) 
+  {
+    fprintf (stderr, "Socorro! malloc devolveu NULL!\n");
+    exit (EXIT_FAILURE_MALLOC);
+  }
 
-    return ptr;
+  return ptr;
 }
 
 
@@ -705,13 +715,13 @@ mallocSafe(size_t nbytes)
 static double 
 luminosidadePixel(Imagem *img, int col, int lin)
 {
-    return  ( 0.21 * img->pixel[lin][col].cor[RED] 
-              + 0.72 * img->pixel[lin][col].cor[GREEN] 
-              + 0.07 * img->pixel[lin][col].cor[BLUE] );
+  return  ( 0.21 * img->pixel[lin][col].cor[RED] 
+            + 0.72 * img->pixel[lin][col].cor[GREEN] 
+            + 0.07 * img->pixel[lin][col].cor[BLUE] );
 }
 
 static int estaDentro(int linha, int coluna, int height, int width) {
-    return (linha >= 0) && (linha < height) && (coluna >= 0) && (coluna < width);
+  return (linha >= 0) && (linha < height) && (coluna >= 0) && (coluna < width);
 }
 
 static int corIgual(Pixel pixel1, CelRegiao* regiao) {
